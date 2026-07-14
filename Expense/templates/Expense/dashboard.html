@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Dashboard</title>
+    <!-- Tailwind CSS for modern, simple styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+
+    <!-- Navbar / Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">Expense Tracker</h1>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-600 font-medium">Welcome, <span class="text-indigo-600 font-semibold">{{ request.user.username }}</span></span>
+                <a href="{% url 'logout' %}" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition font-medium">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Action Buttons & Overview Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
+                <p class="text-sm text-gray-500">Track and manage your expenses effortlessly.</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{% url 'expense_list' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition">
+                    View Expenses
+                </a>
+                <a href="{% url 'add_expense' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow-sm hover:bg-indigo-700 transition">
+                    + Add Expense
+                </a>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Total Expense Card -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Expense</p>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">₹{{ total_expense }}</h3>
+                </div>
+                <div class="p-3 bg-red-50 rounded-xl text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+            </div>
+
+            <!-- Total Records Card -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Transactions</p>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">{{ total_records }}</h3>
+                </div>
+                <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Bar Chart Card -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Monthly Expense Chart</h3>
+                <div class="relative w-full h-64">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Category Pie Chart Card -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col items-center justify-center">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 self-start">Expense by Category</h3>
+                {% if chart %}
+                    <div class="max-h-64 object-contain">
+                        <img src="data:image/png;base64,{{ chart }}" alt="Pie Chart" class="max-h-56">
+                    </div>
+                {% else %}
+                    <p class="text-sm text-gray-400 py-12">No expense data available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Expenses Table -->
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900">Recent Expenses</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <th class="px-6 py-3.5">Title</th>
+                            <th class="px-6 py-3.5">Amount</th>
+                            <th class="px-6 py-3.5">Category</th>
+                            <th class="px-6 py-3.5">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+                        {% for expense in recent_expenses %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 font-medium text-gray-900">{{ expense.title }}</td>
+                            <td class="px-6 py-4 font-semibold text-red-600">₹{{ expense.amount }}</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ expense.category }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-500">{{ expense.date }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-gray-400">
+                                No expenses found. Click "+ Add Expense" to get started!
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ChartJS Script Integration with Fixed Syntax Error -->
+    <script>
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ months|safe }},
+                datasets: [{
+                    label: 'Monthly Expense',
+                    data: {{ amounts|safe }},
+                    backgroundColor: [
+                        '#82196F3', '#0FFC107', '#0FF5722', '#199C27B0', 
+                        '#00BCDA', '#795548', '#8BC34A', '#3F51B5', 
+                        '#E91E63', '#009688', '#607D8B'
+                    ],
+                    borderColor: '#333333', // Fixed the original "id=" syntax bug here
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

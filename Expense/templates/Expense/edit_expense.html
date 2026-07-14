@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Expense</title>
+    <!-- Tailwind CSS to match the dashboard theme -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Automatically styles Django's default {{ form.as_p }} fields */
+        form p {
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+        form label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151; /* text-gray-700 */
+        }
+        form input, form select, form textarea {
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid #D1D5DB; /* border-gray-300 */
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            background-color: #FFFFFF;
+            color: #1F2937;
+            transition: all 0.2s;
+        }
+        form input:focus, form select:focus, form textarea:focus {
+            outline: none;
+            border-color: #4F46E5; /* indigo-600 */
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Top Navbar -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">Expense Tracker</h1>
+            <a href="{% url 'dashboard' %}" class="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition">
+                ← Back to Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- Form Container -->
+    <main class="flex-1 max-w-xl w-full mx-auto px-4 py-12">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+            
+            <!-- Header -->
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Edit Expense</h2>
+                <p class="text-sm text-gray-500 mt-1">Modify the details below to update your logged transaction.</p>
+            </div>
+
+            <!-- Form -->
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    {{ form.as_p }}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                    <a href="{% url 'dashboard' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition">
+                        Update Expense
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+</body>
+</html>
