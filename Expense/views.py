@@ -146,7 +146,7 @@ def dashboard(request):
 
        total_records = expenses.count()
 
-       recent_expenses=expenses.order_by('-date')[:5]
+       recent_expenses=expenses.order_by('-id')[:5]
 
        monthly_data = expenses.annotate(
 
@@ -174,7 +174,7 @@ def dashboard(request):
 
              'total_records': total_records,
         
-             'recent_expense':recent_expenses,
+             'recent_expenses':recent_expenses,
 
              'chart':chart,
 
